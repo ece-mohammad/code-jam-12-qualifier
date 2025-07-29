@@ -128,18 +128,81 @@ def query_selector_all(node: Node, selector: str) -> list[Node]:
     """
 
     matches: list[Node] = []
-    selectors: list[Selector] = []
-    children: list[Node] = [node]
 
-    for selector_token in selector.split(", "):
-        selectors.append(parse_selector_token(selector_token))
+    for selector_part in selector.split(","):
+        select_matches: list[Node] = []
+        children: list[Node] = [node]
+        select = parse_selector_token(selector_part)
 
-    while children:
-        child = children.pop()
-        for select in selectors:
-            if match_selector(child, select):
-                matches.append(child)
+        while children:
+            child = children.pop()
+            if match_selector(child, select) and child not in matches:
+                select_matches.append(child)
 
-        children.extend(child.children[::-1])
+            children.extend(child.children[::-1])
+        matches.extend(select_matches)
 
     return matches
+
+
+if __name__ == "__main__":
+    node = Node(
+        tag="div",
+        attributes={"id": "topDiv"},
+        children=[
+            Node(
+                tag="div",
+                attributes={
+                    "id"   : "innerDiv",
+                    "class": "container colour-primary"
+                },
+                children=[
+                    Node(tag="h1", text="This is a heading!"),
+                    Node(
+                        tag="p",
+                        attributes={
+                            "class": "colour-secondary",
+                            "id"   : "innerContent"
+                        },
+                        text="I have some content within this container also!",
+                    ),
+                    Node(
+                        tag="p",
+                        attributes={
+                            "class": "colour-secondary",
+                            "id"   : "two"
+                        },
+                        text="This is another paragraph.",
+                    ),
+                    Node(
+                        tag="p",
+                        attributes={"class": "colour-secondary important"},
+                        text="This is a third paragraph.",
+                    ),
+                    Node(
+                        tag="a",
+                        attributes={
+                            "id"   : "home-link",
+                            "class": "colour-primary button"
+                        },
+                        text="This is a button link.",
+                    ),
+                ],
+            ),
+            Node(
+                tag="div",
+                attributes={"class": "container colour-secondary"},
+                children=[
+                    Node(
+                        tag="p",
+                        attributes={"class": "colour-primary"},
+                        text="This is a paragraph in a secondary container.",
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    query = "p#two.colour-secondary, a#home-link.colour-primary.button"
+    res = query_selector_all(node, query)
+    print(res)
