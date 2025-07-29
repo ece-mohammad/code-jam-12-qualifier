@@ -12,7 +12,9 @@ class Selector:
 
     Attributes:
         tag_name: The tag name of the selector
-        filter: A dictionary of attributes to match for the selector
+        filter: A dictionary of attributes to match for the selector.
+            - supports `id` and `class`. An `id` is a string, a `class` is a
+            set of strings each representing a class.
     """
 
     __match_args__ = ("tag_name", "filter")
@@ -20,8 +22,8 @@ class Selector:
     tag_name: str = ""
     filter: dict[str, str | set[str]] = field(default_factory=dict)
 
-    def repr__(self):
-        return "Selector(tag_name={}, filter={}".format(
+    def __repr__(self):
+        return "Selector(tag_name={}, filter={})".format(
             self.tag_name, self.filter
         )
 
@@ -64,6 +66,16 @@ def parse_selector_token(selector: str) -> Selector:
     return parsed_selector
 
 
+def parse_query(query: str) -> list[Selector]:
+    """Given a query, returns a list of Selector objects.
+    :param query: A query string
+    :type query: str
+    :return: A list of Selector objects
+    :rtype: list[Selector]
+    """
+    return [parse_selector_token(selector) for selector in query.split(",")]
+
+
 def match_class(node: Node, class_set: set[str]) -> bool:
     """Returns True if the node has all the classes in the class_set, False
     otherwise.
@@ -78,7 +90,7 @@ def match_class(node: Node, class_set: set[str]) -> bool:
     if "class" not in node.attributes:
         return False
     node_classes = set(node.attributes["class"].split())
-    return node_classes.intersection(class_set) == class_set
+    return class_set.issubset(node_classes)
 
 
 def match_id(node: Node, tag_id: str) -> bool:
@@ -129,16 +141,17 @@ def query_selector_all(node: Node, selector: str) -> list[Node]:
 
     matches: list[Node] = []
 
-    for selector_part in selector.split(","):
+    for select in parse_query(selector):
         select_matches: list[Node] = []
         children: list[Node] = [node]
-        select = parse_selector_token(selector_part)
+        seen_nodes_ids: set[int] = set()
 
         while children:
             child = children.pop()
-            if match_selector(child, select) and child not in matches:
+            if match_selector(child, select) and id(child) not in seen_nodes_ids:
                 select_matches.append(child)
 
+            seen_nodes_ids.add(id(child))
             children.extend(child.children[::-1])
         matches.extend(select_matches)
 
