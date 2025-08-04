@@ -63,6 +63,11 @@ import re
 
 from node import Node
 
+_TOKEN_PATTERN = re.compile(r"(?P<token>(?P<lead>[#.> ])?[\w\-]{1,100})")
+_SPACE_PATTERN = re.compile(r"\s+")
+_CHILD_PATTERN = re.compile(r"\s*>\s*")
+_COMMA_PATTERN = re.compile(r"\s*,\s*")
+
 
 class Relation(IntEnum):
     """An enum to represent the relation between two selectors in a selector
@@ -134,10 +139,9 @@ def parse_selector_token(selector_token: str) -> SelectorChain:
     Returns:
         SelectorChain: A SelectorChain object representing the selector token.
     """
-    token_pattern = re.compile(r"(?P<token>(?P<lead>[#.> ])?[\w\-]+)")
     parsed_selector = SelectorChain()
 
-    for token in token_pattern.finditer(selector_token):
+    for token in _TOKEN_PATTERN.finditer(selector_token):
         if token.group("lead") == ".":
             if "class" in parsed_selector.filter:
                 parsed_selector.filter["class"].add(
@@ -175,10 +179,8 @@ def normalize_selector_chain(selector: str) -> str:
     Returns:
         str: A normalized selector chain string.
     """
-    space_pattern = re.compile(r"\s+")
-    pattern = re.compile(r"\s*>\s*")
-    spaced_selector = space_pattern.sub(" ", selector)
-    return pattern.sub(" > ", spaced_selector)
+    spaced_selector = _SPACE_PATTERN.sub(" ", selector)
+    return _CHILD_PATTERN.sub(" > ", spaced_selector)
 
 
 def parse_selector_chain(selector: str) -> SelectorChain:
@@ -209,7 +211,7 @@ def parse_selector_chain(selector: str) -> SelectorChain:
     parsed_selector = None
     selector_tokens = [
         tok.strip()
-        for tok in re.split(r"\s+", selector) if tok
+        for tok in selector.split() if tok
     ]
     for token in selector_tokens:
         if token == '>':
@@ -242,7 +244,7 @@ def parse_selector(query: str) -> list[SelectorChain]:
     """
     return [
         parse_selector_chain(selector)
-        for selector in re.split(r"\s*,\s*", query)
+        for selector in _COMMA_PATTERN.split(query)
     ]
 
 
@@ -295,7 +297,7 @@ def match_id_selector(node: Node, tag_id: str) -> bool:
     return node.attributes["id"] == tag_id
 
 
-def match_parent_selector(selector: SelectorChain, context: list[Node] = None) -> bool:
+def match_parent_selector(selector: SelectorChain, context: list[Node] | None = None) -> bool:
     """Matches a node and its parents against a selector chain.
 
     Args:
