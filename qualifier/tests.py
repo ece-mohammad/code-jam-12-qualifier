@@ -2,10 +2,10 @@
 Test cases for the query_selector_all function
 """
 
-
 import unittest
 
 from node import Node
+
 import qualifier
 
 solution = qualifier.query_selector_all
@@ -21,8 +21,8 @@ class TestQuerySelector(unittest.TestCase):
                 Node(
                     tag="div",
                     attributes={
-                        "id"   : "innerDiv",
-                        "class": "container colour-primary"
+                        "id": "innerDiv",
+                        "class": "container colour-primary",
                     },
                     children=[
                         Node(tag="h1", text="This is a heading!"),
@@ -30,7 +30,7 @@ class TestQuerySelector(unittest.TestCase):
                             tag="p",
                             attributes={
                                 "class": "colour-secondary",
-                                "id"   : "innerContent"
+                                "id": "innerContent",
                             },
                             text="I have some content within this container also!",
                         ),
@@ -38,7 +38,7 @@ class TestQuerySelector(unittest.TestCase):
                             tag="p",
                             attributes={
                                 "class": "colour-secondary",
-                                "id"   : "two"
+                                "id": "two",
                             },
                             text="This is another paragraph.",
                         ),
@@ -50,8 +50,8 @@ class TestQuerySelector(unittest.TestCase):
                         Node(
                             tag="a",
                             attributes={
-                                "id"   : "home-link",
-                                "class": "colour-primary button"
+                                "id": "home-link",
+                                "class": "colour-primary button",
                             },
                             text="This is a button link.",
                         ),
@@ -202,7 +202,7 @@ class TestQuerySelector(unittest.TestCase):
         node = self.node_test1
         result = solution(
             node,
-            "li#random.someclass, a#home-link, div, .colour-primary.badclass"
+            "li#random.someclass, a#home-link, div, .colour-primary.badclass",
         )
         answer = [
             node,
@@ -236,8 +236,8 @@ class TestBonus(unittest.TestCase):
                 Node(
                     tag="div",
                     attributes={
-                        "id"   : "innerDiv",
-                        "class": "container colour-primary"
+                        "id": "innerDiv",
+                        "class": "container colour-primary",
                     },
                     children=[
                         Node(tag="h1", text="This is a heading!"),
@@ -245,7 +245,7 @@ class TestBonus(unittest.TestCase):
                             tag="p",
                             attributes={
                                 "class": "colour-secondary",
-                                "id"   : "innerContent"
+                                "id": "innerContent",
                             },
                             text="I have some content within this container also!",
                         ),
@@ -253,7 +253,7 @@ class TestBonus(unittest.TestCase):
                             tag="p",
                             attributes={
                                 "class": "colour-secondary",
-                                "id"   : "two"
+                                "id": "two",
                             },
                             text="This is another paragraph.",
                         ),
@@ -265,8 +265,8 @@ class TestBonus(unittest.TestCase):
                         Node(
                             tag="a",
                             attributes={
-                                "id"   : "home-link",
-                                "class": "colour-primary button"
+                                "id": "home-link",
+                                "class": "colour-primary button",
                             },
                             text="This is a button link.",
                         ),
@@ -460,7 +460,7 @@ class TestPseudoClasses(unittest.TestCase):
                         Node(tag="h1", text="Morning Times"),
                         Node(
                             tag="h2", text="Delivering you news every morning"
-                            ),
+                        ),
                         Node(tag="p", text="Lorem ipsum dolor sit amet"),
                     ],
                 ),
@@ -470,7 +470,7 @@ class TestPseudoClasses(unittest.TestCase):
                         Node(tag="h1", text="Morning Times"),
                         Node(
                             tag="h2", text="Delivering you news every morning"
-                            ),
+                        ),
                         Node(tag="h3", text="8:00 am"),
                         Node(tag="p", text="Lorem ipsum dolor sit amet"),
                     ],
@@ -485,8 +485,8 @@ class TestPseudoClasses(unittest.TestCase):
                 Node(
                     tag="div",
                     attributes={
-                        "id"   : "innerDiv",
-                        "class": "container colour-primary"
+                        "id": "innerDiv",
+                        "class": "container colour-primary",
                     },
                     children=[
                         Node(tag="h1", text="This is a heading!"),
@@ -494,7 +494,7 @@ class TestPseudoClasses(unittest.TestCase):
                             tag="p",
                             attributes={
                                 "class": "colour-secondary",
-                                "id"   : "innerContent"
+                                "id": "innerContent",
                             },
                             text="I have some content within this container also!",
                         ),
@@ -502,7 +502,7 @@ class TestPseudoClasses(unittest.TestCase):
                             tag="p",
                             attributes={
                                 "class": "colour-secondary",
-                                "id"   : "two"
+                                "id": "two",
                             },
                             text="This is another paragraph.",
                         ),
@@ -514,8 +514,8 @@ class TestPseudoClasses(unittest.TestCase):
                         Node(
                             tag="a",
                             attributes={
-                                "id"   : "home-link",
-                                "class": "colour-primary button"
+                                "id": "home-link",
+                                "class": "colour-primary button",
                             },
                             text="This is a button link.",
                         ),

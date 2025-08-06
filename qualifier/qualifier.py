@@ -71,10 +71,10 @@ Notes:
 
 from __future__ import annotations
 
+import re
 from copy import deepcopy
 from dataclasses import dataclass, field
-from enum import IntEnum, Enum
-import re
+from enum import Enum, IntEnum
 
 from node import Node
 
@@ -88,7 +88,7 @@ _TOKEN_PATTERN = re.compile(
         _TAG_PATTERN,
         _CLASS_PATTERN,
         _ID_PATTERN,
-        _PSEUDO_CLASS_PATTERN
+        _PSEUDO_CLASS_PATTERN,
     )
 )
 
@@ -112,6 +112,7 @@ class PseudoClassType(Enum):
         NTH_CHILD (str): The nth-child pseudo-class.
         NOT (str): The not pseudo-class.
     """
+
     FIRST_CHILD = "first-child"
     LAST_CHILD = "last-child"
     NTH_CHILD = "nth-child"
@@ -133,16 +134,16 @@ class PseudoClass:
             - For :not(.class), argument would be a SelectorChain
             - For :first-child, argument would be None
     """
+
     type: PseudoClassType
-    argument: str | int | 'SelectorChain' | None = None
+    argument: str | int | "SelectorChain" | None = None
 
     def __repr__(self):
         if self.argument is None:
             return "PseudoClass(type={})".format(self.type)
 
         return "PseudoClass(type={}, argument={})".format(
-            self.type,
-            self.argument
+            self.type, self.argument
         )
 
 
@@ -156,6 +157,7 @@ class Relation(IntEnum):
             the second.
         DESCENDANT (int): The first selector is a descendant of the second.
     """
+
     IMMEDIATE_CHILD = 0
     DESCENDANT = 1
 
@@ -178,6 +180,7 @@ class SelectorChain:
             selector and the next selector. The default value is
             Relation.DESCENDANT.
     """
+
     tag_name: str = ""
     filter: dict[str, str | set[str]] = field(default_factory=dict)
     next_selector: SelectorChain | None = None
@@ -185,8 +188,10 @@ class SelectorChain:
     pseudo_class: PseudoClass | None = None
 
     def __repr__(self):
-        return ("Selector(tag_name={}, filter={}, pseudo_class={}, "
-                "relation={}, next={})").format(
+        return (
+            "Selector(tag_name={}, filter={}, pseudo_class={}, "
+            "relation={}, next={})"
+        ).format(
             self.tag_name,
             self.filter,
             self.pseudo_class,
@@ -290,8 +295,8 @@ def parse_selector_token(selector_token: str) -> SelectorChain:
 
 
 def normalize_selector_chain(selector: str) -> str:
-    """Normalizes a selector chain string by removing leading/trailing spaces, replacing
-    multiple spaces with a single space, and formatting `>` as ` > `.
+    """Normalizes a selector chain string by removing leading/trailing spaces,
+    replacing multiple spaces with a single space, and formatting `>` as ` > `.
 
     Examples:
         >>> normalize_selector_chain("div   p")
@@ -316,7 +321,8 @@ def parse_selector_chain(selector: str) -> SelectorChain:
 
     The selector chain is built in reverse order (right-to-left) for more
     efficient matching. For example, "div > p" is stored as:
-        SelectorChain("p") -> SelectorChain("div") with relation IMMEDIATE_CHILD
+        `SelectorChain("p") -> SelectorChain("div") with relation
+        IMMEDIATE_CHILD`
 
     Supported syntax:
     - Element selectors: "div", "p", etc.
@@ -343,17 +349,15 @@ def parse_selector_chain(selector: str) -> SelectorChain:
         selector (str): A selector chain, e.g., `div h1 > p`.
 
     Returns:
-        SelectorChain: A SelectorChain object representing the parsed selector chain.
+        SelectorChain: A SelectorChain object representing the parsed selector
+            chain.
     """
     selector = normalize_selector_chain(selector)
 
     parsed_selector = None
-    selector_tokens = [
-        tok.strip()
-        for tok in selector.split() if tok
-    ]
+    selector_tokens = [tok.strip() for tok in selector.split() if tok]
     for token in selector_tokens:
-        if token == '>':
+        if token == ">":
             parsed_selector.relation_to_previous = Relation.IMMEDIATE_CHILD
             continue
 
@@ -371,15 +375,24 @@ def parse_selector(query: str) -> list[SelectorChain]:
         >>> parse_selector("div, p")
         ... [SelectorChain(tag_name="div"), SelectorChain(tag_name="p")]
         >>> parse_selector("div > p")
-        ... [SelectorChain(tag_name="p", relation=Relation.IMMEDIATE_CHILD, next=SelectorChain(tag_name="div"))]
+        ... [
+        ...   SelectorChain(tag_name="p",
+        ...     relation=Relation.IMMEDIATE_CHILD,
+        ...     next=SelectorChain(tag_name="div"))
+        ... ]
         >>> parse_selector("div p")
-        ... [SelectorChain(tag_name="p", relation=Relation.DESCENDANT, next=SelectorChain(tag_name="div"))]
+        ... [
+        ...   SelectorChain(tag_name="p",
+        ...     relation=Relation.DESCENDANT,
+        ...     next=SelectorChain(tag_name="div"))
+        ... ]
 
     Args:
         query (str): A query string containing one or more selector chains.
 
     Returns:
-        list[SelectorChain]: A list of SelectorChain objects representing the parsed selectors.
+        list[SelectorChain]: A list of SelectorChain objects representing the
+            parsed selectors.
     """
     return [
         parse_selector_chain(selector)
@@ -388,7 +401,8 @@ def parse_selector(query: str) -> list[SelectorChain]:
 
 
 def match_class_selector(node: Node, class_set: set[str]) -> bool:
-    """Checks if a node has all the specified classes in the provided class set.
+    """Checks if a node has all the specified classes in the provided class
+    set.
 
     Examples:
         >>> match_class_selector(
@@ -401,10 +415,12 @@ def match_class_selector(node: Node, class_set: set[str]) -> bool:
 
     Args:
         node (Node): The node to check for matching classes.
-        class_set (set[str]): A set of class names to match against the node's classes.
+        class_set (set[str]): A set of class names to match against the node's
+            classes.
 
     Returns:
-        bool: True if the node has all the classes in the class_set, False otherwise.
+        bool: True if the node has all the classes in the class_set, False
+            otherwise.
     """
     if "class" not in node.attributes:
         return False
@@ -436,7 +452,9 @@ def match_id_selector(node: Node, tag_id: str) -> bool:
     return node.attributes["id"] == tag_id
 
 
-def match_parent_selector(selector: SelectorChain, context: list[Node] | None = None) -> bool:
+def match_parent_selector(
+    selector: SelectorChain, context: list[Node] | None = None
+) -> bool:
     """Checks if the parent hierarchy matches the selector chain.
 
     This function verifies that the node's parent hierarchy matches the
@@ -450,7 +468,8 @@ def match_parent_selector(selector: SelectorChain, context: list[Node] | None = 
             the current context. The first element is the direct parent.
 
     Returns:
-        bool: True if the node and its parents match the selector chain, False otherwise.
+        bool: True if the node and its parents match the selector chain, False
+            otherwise.
     """
     parent_selector = selector.next_selector
     parents = deepcopy(context) if context else []
@@ -479,7 +498,8 @@ def match_parent_selector(selector: SelectorChain, context: list[Node] | None = 
 
 
 def match_first_child_pseudo_class_selector(
-    node: Node, context: list[Node]) -> bool:
+    node: Node, context: list[Node]
+) -> bool:
     """Checks if a node is the first child of its parent.
 
     Args:
@@ -497,7 +517,8 @@ def match_first_child_pseudo_class_selector(
 
 
 def match_last_child_pseudo_class_selector(
-    node: Node, context: list[Node]) -> bool:
+    node: Node, context: list[Node]
+) -> bool:
     """Checks if a node is the last child of its parent.
 
     Args:
@@ -515,7 +536,8 @@ def match_last_child_pseudo_class_selector(
 
 
 def match_nth_child_pseudo_class_selector(
-    node: Node, index: int, context: list[Node]) -> bool:
+    node: Node, index: int, context: list[Node]
+) -> bool:
     """Checks if a node is the nth child of its parent.
 
     Args:
@@ -530,34 +552,47 @@ def match_nth_child_pseudo_class_selector(
         return False
 
     parent = context[-1]
-    return 0 < index <= len(parent.children) and node == parent.children[
-        index - 1]
+    return (
+        0 < index <= len(parent.children)
+        and node == parent.children[index - 1]
+    )
 
 
 def match_not_pseudo_class_selector(
-    node: Node, selector: SelectorChain,
-    context: list[Node] | None = None) -> bool:
+    node: Node, selector: SelectorChain, context: list[Node] | None = None
+) -> bool:
     """Checks if a node does not match a selector.
 
     Args:
         node (Node): The node to check.
         selector (SelectorChain): The selector to check against.
-        context (list[Node], optional): A list of parent nodes representing the context.
-            Defaults to None.
+        context (list[Node], optional): A list of parent nodes representing
+            the context. Defaults to None.
 
     Returns:
         True if the node does not match the selector, False otherwise.
     """
     copy_selector = deepcopy(selector)
     copy_selector.next_selector = None
-    # copy_selector.pseudo_class = None
     copy_selector.relation_to_previous = Relation.DESCENDANT
     return not match_selector(node, selector, context)
 
 
 def match_pseudo_class_selector(
-    node: Node, selector: SelectorChain,
-    context: list[Node] | None = None) -> bool:
+    node: Node, selector: SelectorChain, context: list[Node] | None = None
+) -> bool:
+    """Checks if a node matches a pseudo-class selector.
+
+    Args:
+        node (Node): The node to check.
+        selector (SelectorChain): The selector to check against.
+        context (list[Node], optional): A list of parent nodes representing
+            the context. Defaults to None.
+
+    Returns:
+        True if the node matches the pseudo-class selector, False otherwise.
+    """
+
     pseudo_class = selector.pseudo_class
     parent_node = context[-1] if context else None
 
@@ -585,14 +620,16 @@ def match_pseudo_class_selector(
 
 
 def match_selector(
-    node: Node, selector: SelectorChain,
-    context: list[Node] | None = None) -> bool:
+    node: Node, selector: SelectorChain, context: list[Node] | None = None
+) -> bool:
     """Matches a node against a single selector, returning True if the node
     matches the selector's tag name, class, and id, False otherwise.
 
     Args:
         node (Node): The node to match.
         selector (SelectorChain): The selector to match against.
+        context (list[Node], optional): A list of parent nodes representing
+            the context, used for matching pseudo-classes. Defaults to None.
 
     Returns:
         bool: True if the node matches the selector, False otherwise.
@@ -602,12 +639,12 @@ def match_selector(
         return False
 
     if "class" in selector.filter and not match_class_selector(
-            node, selector.filter["class"]
+        node, selector.filter["class"]
     ):
         return False
 
     if "id" in selector.filter and not match_id_selector(
-            node, selector.filter["id"]
+        node, selector.filter["id"]
     ):
         return False
 
@@ -615,8 +652,10 @@ def match_selector(
 
 
 def match_selector_chain(
-    node: Node, selector_chain: SelectorChain,
-    context: list[Node] | None = None) -> list[Node]:
+    node: Node,
+    selector_chain: SelectorChain,
+    context: list[Node] | None = None,
+) -> list[Node]:
     """Matches a node and its descendants against a selector chain, returning
     all matching nodes.
 
@@ -627,7 +666,8 @@ def match_selector_chain(
     Args:
         node (Node): The root node to start matching from.
         selector_chain (SelectorChain): The selector chain to match against.
-        context (list[Node], optional): A list of parent nodes as context. Defaults to None.
+        context (list[Node], optional): A list of parent nodes as context.
+            Defaults to None.
 
     Returns:
         list[Node]: A list of nodes that match the selector chain.
@@ -637,8 +677,9 @@ def match_selector_chain(
     matches_ids = set()
     parents = deepcopy(context) or []
 
-    if (match_selector(node, selector_chain, context=parents) and
-            match_parent_selector(selector_chain, context=parents)):
+    if match_selector(
+        node, selector_chain, context=parents
+    ) and match_parent_selector(selector_chain, context=parents):
         matches_ids.add(id(node))
         matches.append(node)
 
@@ -692,8 +733,8 @@ if __name__ == "__main__":
             Node(
                 tag="div",
                 attributes={
-                    "id"   : "innerDiv",
-                    "class": "container colour-primary"
+                    "id": "innerDiv",
+                    "class": "container colour-primary",
                 },
                 children=[
                     Node(tag="h1", text="This is a heading!"),
@@ -701,16 +742,13 @@ if __name__ == "__main__":
                         tag="p",
                         attributes={
                             "class": "colour-secondary",
-                            "id"   : "innerContent"
+                            "id": "innerContent",
                         },
                         text="I have some content within this container also!",
                     ),
                     Node(
                         tag="p",
-                        attributes={
-                            "class": "colour-secondary",
-                            "id"   : "two"
-                        },
+                        attributes={"class": "colour-secondary", "id": "two"},
                         text="This is another paragraph.",
                     ),
                     Node(
@@ -721,8 +759,8 @@ if __name__ == "__main__":
                     Node(
                         tag="a",
                         attributes={
-                            "id"   : "home-link",
-                            "class": "colour-primary button"
+                            "id": "home-link",
+                            "class": "colour-primary button",
                         },
                         text="This is a button link.",
                     ),
