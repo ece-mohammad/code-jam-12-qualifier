@@ -463,12 +463,14 @@ def match_parent_selector(selector: SelectorChain, context: list[Node] | None = 
 
     if parent_selector.relation_to_previous == Relation.IMMEDIATE_CHILD:
         immediate_parent = parents.pop()
-        if not match_selector(immediate_parent, parent_selector):
+        if not match_selector(
+            immediate_parent, parent_selector, context=parents
+        ):
             return False
     else:
         while parents:
             parent = parents.pop()
-            if match_selector(parent, parent_selector):
+            if match_selector(parent, parent_selector, context=parents):
                 break
         else:
             return False
@@ -740,6 +742,6 @@ if __name__ == "__main__":
         ],
     )
 
-    query = "div p:not(.colour-primary)"
+    query = "div:nth-child(1) > p"
     res = query_selector_all(node, query)
     print(*res, sep="\n")

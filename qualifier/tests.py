@@ -575,6 +575,12 @@ class TestPseudoClasses(unittest.TestCase):
         ]
         self.assertCountEqual(result, expected)
 
+    def test_parent_pseudo_class(self):
+        node = self.node_test2
+        result = solution(node, "div:last-child p")
+        expected = [node.children[1].children[0]]
+        self.assertCountEqual(result, expected)
+
 
 if __name__ == "__main__":
     unittest.main()
