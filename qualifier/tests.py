@@ -426,5 +426,155 @@ class TestBonus(unittest.TestCase):
         self.assertCountEqual(result, expected)
 
 
+class TestPseudoClasses(unittest.TestCase):
+    def setUp(self):
+        """
+        <section>
+            <article>
+                <h1>Morning Times</h1>
+                <h2>Delivering you news every morning</h2>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+                    tempor incididunt ut labore et dolore magna aliqua.
+                </p>
+                </article>
+                <article>
+                <h1>Morning Times</h1>
+                <h2>Delivering you news every morning</h2>
+                <h3>8:00 am</h3>
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+                    tempor incididunt ut labore et dolore magna aliqua.
+                </p>
+                </article>
+            </section>
+        """
+        self.node_test1 = Node(
+            tag="section",
+            attributes={"class": "news"},
+            children=[
+                Node(
+                    tag="article",
+                    attributes={"class": "important"},
+                    children=[
+                        Node(tag="h1", text="Morning Times"),
+                        Node(
+                            tag="h2", text="Delivering you news every morning"
+                            ),
+                        Node(tag="p", text="Lorem ipsum dolor sit amet"),
+                    ],
+                ),
+                Node(
+                    tag="article",
+                    children=[
+                        Node(tag="h1", text="Morning Times"),
+                        Node(
+                            tag="h2", text="Delivering you news every morning"
+                            ),
+                        Node(tag="h3", text="8:00 am"),
+                        Node(tag="p", text="Lorem ipsum dolor sit amet"),
+                    ],
+                ),
+            ],
+        )
+
+        self.node_test2 = Node(
+            tag="div",
+            attributes={"id": "topDiv"},
+            children=[
+                Node(
+                    tag="div",
+                    attributes={
+                        "id"   : "innerDiv",
+                        "class": "container colour-primary"
+                    },
+                    children=[
+                        Node(tag="h1", text="This is a heading!"),
+                        Node(
+                            tag="p",
+                            attributes={
+                                "class": "colour-secondary",
+                                "id"   : "innerContent"
+                            },
+                            text="I have some content within this container also!",
+                        ),
+                        Node(
+                            tag="p",
+                            attributes={
+                                "class": "colour-secondary",
+                                "id"   : "two"
+                            },
+                            text="This is another paragraph.",
+                        ),
+                        Node(
+                            tag="p",
+                            attributes={"class": "colour-secondary important"},
+                            text="This is a third paragraph.",
+                        ),
+                        Node(
+                            tag="a",
+                            attributes={
+                                "id"   : "home-link",
+                                "class": "colour-primary button"
+                            },
+                            text="This is a button link.",
+                        ),
+                    ],
+                ),
+                Node(
+                    tag="div",
+                    attributes={"class": "container colour-secondary"},
+                    children=[
+                        Node(
+                            tag="p",
+                            attributes={"class": "colour-primary"},
+                            text="This is a paragraph in a secondary container.",
+                        ),
+                    ],
+                ),
+            ],
+        )
+
+    def test_pseudo_class_first_child(self):
+        node = self.node_test1
+        result = solution(node, "article:first-child")
+        expected = [node.children[0]]
+        self.assertCountEqual(result, expected)
+
+    def test_pseudo_class_last_child(self):
+        node = self.node_test1
+        result = solution(node, "article:last-child")
+        expected = [node.children[1]]
+        self.assertCountEqual(result, expected)
+
+    def test_pseudo_class_nth_child(self):
+        node = self.node_test1
+        result = solution(node, "article:nth-child(2)")
+        expected = [node.children[1]]
+        self.assertCountEqual(result, expected)
+
+    def test_pseudo_class_nth_child2(self):
+        node = self.node_test2
+        result = solution(node, "div p:nth-child(2)")
+        expected = [node.children[0].children[1]]
+        self.assertCountEqual(result, expected)
+
+    def test_pseudo_class_not(self):
+        node = self.node_test1
+        result = solution(node, "article:not(.important)")
+        expected = [node.children[1]]
+        self.assertCountEqual(result, expected)
+
+    def test_pseudo_class_not2(self):
+        node = self.node_test2
+        result = solution(node, "div p:not(.colour-primary)")
+        expected = [
+            node.children[0].children[1],
+            node.children[0].children[2],
+            node.children[0].children[3],
+        ]
+        self.assertCountEqual(result, expected)
+
+
 if __name__ == "__main__":
     unittest.main()
