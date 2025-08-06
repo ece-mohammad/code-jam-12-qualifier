@@ -581,6 +581,20 @@ class TestPseudoClasses(unittest.TestCase):
         expected = [node.children[1].children[0]]
         self.assertCountEqual(result, expected)
 
+    def match_only_pseudo_class(self):
+        node = self.node_test2
+        result = solution(node, ":not(.container)")
+        expected = [
+            node,
+            node.children[0].children[0],
+            node.children[0].children[1],
+            node.children[0].children[2],
+            node.children[0].children[3],
+            node.children[0].children[4],
+            node.children[1].children[0],
+        ]
+        self.assertCountEqual(result, expected)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -594,27 +594,25 @@ def match_pseudo_class_selector(
     """
 
     pseudo_class = selector.pseudo_class
-    parent_node = context[-1] if context else None
 
     if not pseudo_class:
         return True
 
-    if parent_node:
-        if pseudo_class.type == PseudoClassType.FIRST_CHILD:
-            return match_first_child_pseudo_class_selector(node, context)
+    if pseudo_class.type == PseudoClassType.FIRST_CHILD:
+        return match_first_child_pseudo_class_selector(node, context)
 
-        if pseudo_class.type == PseudoClassType.LAST_CHILD:
-            return match_last_child_pseudo_class_selector(node, context)
+    if pseudo_class.type == PseudoClassType.LAST_CHILD:
+        return match_last_child_pseudo_class_selector(node, context)
 
-        if pseudo_class.type == PseudoClassType.NTH_CHILD:
-            return match_nth_child_pseudo_class_selector(
-                node, pseudo_class.argument, context
-            )
+    if pseudo_class.type == PseudoClassType.NTH_CHILD:
+        return match_nth_child_pseudo_class_selector(
+            node, pseudo_class.argument, context
+        )
 
-        if pseudo_class.type == PseudoClassType.NOT:
-            return match_not_pseudo_class_selector(
-                node, pseudo_class.argument, context
-            )
+    if pseudo_class.type == PseudoClassType.NOT:
+        return match_not_pseudo_class_selector(
+            node, pseudo_class.argument, context
+        )
 
     return False
 
@@ -780,6 +778,6 @@ if __name__ == "__main__":
         ],
     )
 
-    query = "div:nth-child(1) > p"
+    query = ":last-child"
     res = query_selector_all(node, query)
     print(*res, sep="\n")
